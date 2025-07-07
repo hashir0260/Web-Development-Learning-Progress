@@ -1,27 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8">
+  <title>My Profile</title>
+
+  <!-- External CSS -->
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Internal CSS -->
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+      padding: 20px;
+    }
+
+    #bio {
+      color: darkslategray;
+      background-color: #fff;
+      padding: 10px;
+      border-radius: 8px;
+    }
+
+    .highlight {
+      color: #e91e63;
+    }
+  </style>
 </head>
 <body>
-    <div style="color: yellow;">
-        Hello my name is Hashir.
-    </div>
 
-    <style>
-     p{
-        background-color: purple;
-        color: white;
-     }
-    </style>
+  <h1 style="color: steelblue;">Hi, I'm Hashir Ali</h1> <!-- Inline CSS -->
 
-    <h1>Types of Css for adding in Html</h1>
+  <img src="img.png" alt="My Photo" width="150">
 
-    
+  <div id="bio">
+    <p>I am a student learning <span class="highlight">web development</span> and practicing CSS.</p>
+    <p>Today I learned about <strong>inline</strong>, <strong>internal</strong>, and <strong>external</strong> CSS.</p>
+  </div>
 
-    <p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Laboriosam modi architecto non!</p>
+  <h2>My Skills</h2>
+  <ul class="highlight">
+    <li>HTML</li>
+    <li>CSS</li>
+    <li>JavaScript (coming soon)</li>
+  </ul>
 
 </body>
 </html>
