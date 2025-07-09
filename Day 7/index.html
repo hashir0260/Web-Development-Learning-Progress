@@ -1,33 +1,84 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8">
+  <title>CSS Sizing Units Practice</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    .box-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+    }
+
+    .box {
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+
+    .px-box {
+      width: 150px;
+      height: 100px;
+      background-color: #3498db;
+    }
+
+    .percent-box {
+      width: 50%;
+      height: 100px;
+      background-color: #2ecc71;
+    }
+
+    .em-box {
+      font-size: 2em;
+      width: 10em;
+      height: 5em;
+      background-color: #e67e22;
+    }
+
+    .rem-box {
+      font-size: 1.5rem;
+      width: 12rem;
+      height: 6rem;
+      background-color: #9b59b6;
+    }
+
+    .vw-box {
+      width: 30vw;
+      height: 15vh;
+      background-color: #e74c3c;
+    }
+
+    .vh-box {
+      width: 25vw;
+      height: 20vh;
+      background-color: #1abc9c;
+    }
+
+  </style>
 </head>
 <body>
-     
-    <style>
-        p:first-child{
-            color: red;
-            background-color: yellow;
-        }
-        div p{
-            background-color: blue;
-            color: white;
-        }
-    </style>
+  <h1>CSS Sizing Units Demo</h1>
 
-
-    <div>
-        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Odit.</p>
-        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Odit.</p>
-        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Odit.</p>
-    </div>
-    <div>
-        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Ullam!</p>
-        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Ullam!</p>
-        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Ullam!</p>
-    </div>
+  <div class="box-container">
+    <div class="box px-box">150px</div>
+    <div class="box percent-box">50%</div>
+    <div class="box em-box">10em</div>
+    <div class="box rem-box">12rem</div>
+    <div class="box vw-box">30vw</div>
+    <div class="box vh-box">20vh</div>
+  </div>
 </body>
 </html>
