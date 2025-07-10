@@ -1,44 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CSS Units Practice</title>
-  <style>
-    body {
-      font-size: 16px; /* 1rem = 16px */
-      margin: 0;
-      padding: 0;
-    }
-
-    .box {
-      width: 50%;         /* 50% of parent (body) */
-      height: 200px;      /* 200 pixels */
-      background: lightblue;
-      margin: 20px auto;
-      padding: 2em;        /* 2 times the font-size (2 x 16 = 32px) */
-      font-size: 1.5rem;   /* 1.5 times root font-size (1.5 x 16 = 24px) */
-    }
-
-    .small-box {
-      width: 10vw;       /* 10% of viewport width */
-      height: 10vh;      /* 10% of viewport height */
-      background: coral;
-      font-size: 1em;    /* Same as .box’s font size (24px) */
-      margin: 10px auto;
-      text-align: center;
-      line-height: 10vh; /* center vertically */
-      color: white;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .box{
+            border: 2px solid black;
+            padding: 34px;
+            box-shadow: 5px 15px 5px #bd1313;
+        }
+    </style>
 </head>
 <body>
-
-  <div class="box">
-    This is a box using % width, px height, em padding, and rem font-size.
-
-    <div class="small-box">VW & VH</div>
-  </div>
-
+    <div class="box">
+        I am a box
+    </div>
 </body>
 </html>
