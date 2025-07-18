@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Pixel Fighter Game</title>
+    <style>
+        body {
+            margin: 0;
+            background: #111;
+            color: white;
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        #arena {
+            position: relative;
+            width: 960px;
+            height: 640px;
+            background: url("background.png") no-repeat center/cover;
+            border: 4px solid white;
+            overflow: hidden;
+        }
+
+        .fighter {
+            position: absolute;
+            bottom: 0;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: bottom center;
+            transition: bottom 0.2s ease;
+        }
+
+        #player {
+            left: 120px;
+            width: 250px;
+            height: 1000px;
+            background-image: url("player.png");
+        }
+
+        #enemy {
+            left: 750px;
+            width: 180px;
+            height: 300px;
+            background-image: url("enemy.png");
+        }
+
+        .health-bar {
+            height: 24px;
+            width: 100%;
+            background: linear-gradient(to right, #0f0, #0c0);
+            border-radius: 12px;
+            box-shadow: 0 0 6px rgba(0, 255, 0, 0.7);
+            border: 2px solid #444;
+            margin: 4px 0;
+            transition: width 0.2s ease, background 0.3s ease;
+        }
+
+        .health-bar.low {
+            background: linear-gradient(to right, #f00, #a00);
+            box-shadow: 0 0 6px rgba(255, 0, 0, 0.7);
+        }
+
+        .health-bar.medium {
+            background: linear-gradient(to right, #ff0, #cc0);
+            box-shadow: 0 0 6px rgba(255, 255, 0, 0.7);
+        }
+
+        .health-bar.high {
+            background: linear-gradient(to right, #0f0, #0c0);
+            box-shadow: 0 0 6px rgba(0, 255, 0, 0.7);
+        }
+
+        .health-label {
+            font-size: 14px;
+            margin-bottom: 2px;
+            color: #ccc;
+        }
+
+        #controls {
+            margin-top: 20px;
+            font-size: 16px;
+            color: #aaa;
+        }
+
+        h2 {
+            margin: 0;
+            padding: 10px;
+        }
+
+        .pow-effect {
+            position: absolute;
+            font-size: 48px;
+            color: yellow;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px red;
+            animation: pop 0.3s ease-out;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        @keyframes pop {
+            0% {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+
+            50% {
+                transform: scale(1.2);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 0;
+            }
+        }
+
+        .fireball {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: url('fireball.png') no-repeat center/contain;
+            bottom: 200px;
+            z-index: 5;
+        }
+
+        /* UPDATED OVERLAY STYLE */
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, #222 0%, #000 100%);
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+            z-index: 20;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .overlay h1 {
+            font-size: 80px;
+            margin: 0;
+            padding: 10px 20px;
+            background: linear-gradient(to right, #00ff88, #0088ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
+            animation: popIn 0.5s ease-out;
+        }
+
+        .overlay p {
+            font-size: 24px;
+            color: #ccc;
+            margin-top: 20px;
+            max-width: 600px;
+            text-shadow: 1px 1px 4px black;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes popIn {
+            0% {
+                transform: scale(0.7);
+                opacity: 0;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <h2>🎣 HASHIR'S ARCADE</h2>
+
+    <div style="width: 960px; display: flex; justify-content: space-between;">
+        <div style="flex: 1;">
+            <div class="health-label" id="playerHPText">Player: 100 HP</div>
+            <div id="playerHealth" class="health-bar high"></div>
+        </div>
+        <div style="flex: 1; text-align: right;">
+            <div class="health-label" id="enemyHPText">Enemy: 100 HP</div>
+            <div id="enemyHealth" class="health-bar high"></div>
+        </div>
+    </div>
+
+    <div id="arena">
+        <div id="player" class="fighter"></div>
+        <div id="enemy" class="fighter"></div>
+    </div>
+
+    <div id="controls">
+        <p>Controls: <strong>A / D</strong> to Move, <strong>W</strong> to Jump, <strong>Space</strong> to Punch,
+            <strong>E</strong> for Fireball
+        </p>
+    </div>
+
+    <!-- Audio -->
+    <audio id="bgMusic" src="bg_music.mp3" loop autoplay></audio>
+    <audio id="punchSound" src="punch.mp3"></audio>
+    <audio id="fireballSound" src="fireball.mp3"></audio>
+    <audio id="jumpSound" src="jump.mp3"></audio>
+    <audio id="enemyPunchSound" src="enemy_punch.mp3"></audio>
+    <audio id="winSound" src="win.mp3"></audio>
+    <audio id="loseSound" src="lose.mp3"></audio>
+
+    <script>
+        const player = document.getElementById('player');
+        const enemy = document.getElementById('enemy');
+        const playerHealthBar = document.getElementById('playerHealth');
+        const enemyHealthBar = document.getElementById('enemyHealth');
+        const playerHPText = document.getElementById('playerHPText');
+        const enemyHPText = document.getElementById('enemyHPText');
+        const arena = document.getElementById('arena');
+
+        const bgMusic = document.getElementById('bgMusic');
+        const punchSound = document.getElementById('punchSound');
+        const fireballSound = document.getElementById('fireballSound');
+        const jumpSound = document.getElementById('jumpSound');
+        const enemyPunchSound = document.getElementById('enemyPunchSound');
+        const winSound = document.getElementById('winSound');
+        const loseSound = document.getElementById('loseSound');
+
+        bgMusic.volume = 0.2;
+
+        let playerX = 120, enemyX = 750;
+        let playerHealth = 100, enemyHealth = 100;
+        let isJumping = false, canFire = true;
+        const keys = {};
+
+        function resetSound(sound) {
+            sound.pause();
+            sound.currentTime = 0;
+            sound.play();
+        }
+
+        document.addEventListener('keydown', (e) => keys[e.key.toLowerCase()] = true);
+        document.addEventListener('keyup', (e) => {
+            keys[e.key.toLowerCase()] = false;
+            if (e.code === 'Space') punch();
+            if (e.key.toLowerCase() === 'e' && canFire) {
+                canFire = false;
+                fireball();
+                setTimeout(() => canFire = true, 500);
+            }
+        });
+
+        function gameLoop() {
+            if (keys['a']) playerX = Math.max(0, playerX - 4);
+            if (keys['d']) playerX = Math.min(710, playerX + 4);
+            if (keys['w']) jump();
+            player.style.left = playerX + 'px';
+            requestAnimationFrame(gameLoop);
+        }
+        gameLoop();
+
+        function jump() {
+            if (isJumping) return;
+            isJumping = true;
+            resetSound(jumpSound);
+            player.style.bottom = "150px";
+            setTimeout(() => {
+                player.style.bottom = "0";
+                setTimeout(() => isJumping = false, 200);
+            }, 200);
+        }
+
+        // ✅ UPDATED SHOW END SCREEN
+        function showEndScreen(message) {
+            const overlay = document.createElement('div');
+            overlay.className = 'overlay';
+
+            const title = document.createElement('h1');
+            const subtitle = document.createElement('p');
+
+            if (message.includes('Win')) {
+                title.textContent = "🎉 You Win!";
+                subtitle.textContent = "Victory is yours! You've shown true power. Ready for a rematch?";
+            } else {
+                title.textContent = "💀 You Lose!";
+                subtitle.textContent = "Defeated this time... but every fighter rises again. Try again, champion!";
+            }
+
+            overlay.appendChild(title);
+            overlay.appendChild(subtitle);
+            document.body.appendChild(overlay);
+
+            setTimeout(() => location.reload(), 4000);
+        }
+
+        function punch() {
+            const distance = Math.abs(playerX - enemyX);
+            const originalX = playerX;
+            playerX += 30;
+            player.style.left = playerX + 'px';
+            player.style.backgroundImage = "url('player_punch.png')";
+            player.style.width = "300px";
+            player.style.height = "1100px";
+
+            resetSound(punchSound);
+
+            setTimeout(() => {
+                playerX = originalX;
+                player.style.left = playerX + 'px';
+                player.style.backgroundImage = "url('player.png')";
+                player.style.width = "250px";
+                player.style.height = "1000px";
+            }, 200);
+
+            if (distance < 220) {
+                enemyHealth = Math.max(0, enemyHealth - 10);
+                shake(enemy);
+                showPOW(enemyX - 40, 100);
+                updateHealth();
+                if (enemyHealth <= 0) {
+                    resetSound(winSound);
+                    showEndScreen('🎉 You Win!');
+                }
+            }
+        }
+
+        function fireball() {
+            const fireball = document.createElement('div');
+            fireball.className = 'fireball';
+            fireball.style.left = (playerX + 200) + 'px';
+            arena.appendChild(fireball);
+
+            resetSound(fireballSound);
+
+            let x = playerX + 200;
+            const interval = setInterval(() => {
+                x += 10;
+                fireball.style.left = x + 'px';
+
+                if (x > enemyX - 40 && x < enemyX + 60) {
+                    clearInterval(interval);
+                    fireball.remove();
+                    enemyHealth = Math.max(0, enemyHealth - 4);
+                    shake(enemy);
+                    showPOW(enemyX - 20, 80);
+                    updateHealth();
+                    if (enemyHealth <= 0) {
+                        resetSound(winSound);
+                        showEndScreen('🎉 You Win!');
+                    }
+                }
+
+                if (x > 960) {
+                    clearInterval(interval);
+                    fireball.remove();
+                }
+            }, 20);
+        }
+
+        function shake(element) {
+            let i = 0;
+            const originalLeft = parseInt(element.style.left);
+            const interval = setInterval(() => {
+                element.style.left = originalLeft + (i % 2 === 0 ? 5 : -5) + 'px';
+                i++;
+                if (i > 4) {
+                    clearInterval(interval);
+                    element.style.left = originalLeft + 'px';
+                }
+            }, 30);
+        }
+
+        function showPOW(x, y) {
+            const pow = document.createElement('div');
+            pow.className = 'pow-effect';
+            pow.innerText = 'POW!';
+            pow.style.left = x + 'px';
+            pow.style.top = y + 'px';
+            arena.appendChild(pow);
+            setTimeout(() => pow.remove(), 300);
+        }
+
+        function updateHealth() {
+            playerHealthBar.style.width = playerHealth + '%';
+            enemyHealthBar.style.width = enemyHealth + '%';
+            playerHPText.textContent = `Player: ${playerHealth} HP`;
+            enemyHPText.textContent = `Enemy: ${enemyHealth} HP`;
+            updateBarStyle(playerHealthBar, playerHealth);
+            updateBarStyle(enemyHealthBar, enemyHealth);
+        }
+
+        function updateBarStyle(bar, hp) {
+            bar.classList.remove('low', 'medium', 'high');
+            if (hp <= 30) bar.classList.add('low');
+            else if (hp <= 60) bar.classList.add('medium');
+            else bar.classList.add('high');
+        }
+
+        setInterval(() => {
+            const distance = enemyX - playerX;
+            if (distance > 140) {
+                enemyX -= 10;
+            } else if (!isJumping) {
+                const originalX = enemyX;
+                enemyX -= 20;
+                enemy.style.left = enemyX + 'px';
+                enemy.style.backgroundImage = "url('enemy_punch.png')";
+                enemy.style.width = "220px";
+                enemy.style.height = "330px";
+
+                resetSound(enemyPunchSound);
+
+                setTimeout(() => {
+                    enemyX = originalX;
+                    enemy.style.left = enemyX + 'px';
+                    enemy.style.backgroundImage = "url('enemy.png')";
+                    enemy.style.width = "180px";
+                    enemy.style.height = "300px";
+                }, 200);
+
+                playerHealth = Math.max(0, playerHealth - 10);
+                shake(player);
+                showPOW(playerX, 100);
+                updateHealth();
+                if (playerHealth <= 0) {
+                    resetSound(loseSound);
+                    showEndScreen('💀 You Lose!');
+                }
+            }
+            enemy.style.left = enemyX + 'px';
+        }, 600);
+    </script>
+</body>
+
+</html>
