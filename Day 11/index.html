@@ -94,14 +94,11 @@
 
         .pow-effect {
             position: absolute;
-            font-size: 48px;
-            color: yellow;
-            font-weight: bold;
-            text-shadow: 2px 2px 4px red;
             animation: pop 0.3s ease-out;
             pointer-events: none;
             z-index: 10;
         }
+
 
         @keyframes pop {
             0% {
@@ -129,7 +126,6 @@
             z-index: 5;
         }
 
-        /* UPDATED OVERLAY STYLE */
         .overlay {
             position: absolute;
             top: 0;
@@ -212,7 +208,7 @@
 
     <div id="controls">
         <p>Controls: <strong>A / D</strong> to Move, <strong>W</strong> to Jump, <strong>Space</strong> to Punch,
-            <strong>E</strong> for Fireball
+            <strong>K</strong> to Kick, <strong>E</strong> for Fireball
         </p>
     </div>
 
@@ -246,7 +242,7 @@
 
         let playerX = 120, enemyX = 750;
         let playerHealth = 100, enemyHealth = 100;
-        let isJumping = false, canFire = true;
+        let isJumping = false, canFire = true, enemyJumping = false;
         const keys = {};
 
         function resetSound(sound) {
@@ -259,6 +255,7 @@
         document.addEventListener('keyup', (e) => {
             keys[e.key.toLowerCase()] = false;
             if (e.code === 'Space') punch();
+            if (e.key.toLowerCase() === 'k') kick();
             if (e.key.toLowerCase() === 'e' && canFire) {
                 canFire = false;
                 fireball();
@@ -286,27 +283,14 @@
             }, 200);
         }
 
-        // ✅ UPDATED SHOW END SCREEN
-        function showEndScreen(message) {
-            const overlay = document.createElement('div');
-            overlay.className = 'overlay';
-
-            const title = document.createElement('h1');
-            const subtitle = document.createElement('p');
-
-            if (message.includes('Win')) {
-                title.textContent = "🎉 You Win!";
-                subtitle.textContent = "Victory is yours! You've shown true power. Ready for a rematch?";
-            } else {
-                title.textContent = "💀 You Lose!";
-                subtitle.textContent = "Defeated this time... but every fighter rises again. Try again, champion!";
-            }
-
-            overlay.appendChild(title);
-            overlay.appendChild(subtitle);
-            document.body.appendChild(overlay);
-
-            setTimeout(() => location.reload(), 4000);
+        function enemyJump() {
+            if (enemyJumping) return;
+            enemyJumping = true;
+            enemy.style.bottom = "120px";
+            setTimeout(() => {
+                enemy.style.bottom = "0";
+                setTimeout(() => enemyJumping = false, 200);
+            }, 300);
         }
 
         function punch() {
@@ -317,7 +301,6 @@
             player.style.backgroundImage = "url('player_punch.png')";
             player.style.width = "300px";
             player.style.height = "1100px";
-
             resetSound(punchSound);
 
             setTimeout(() => {
@@ -332,6 +315,36 @@
                 enemyHealth = Math.max(0, enemyHealth - 10);
                 shake(enemy);
                 showPOW(enemyX - 40, 100);
+                updateHealth();
+                if (enemyHealth <= 0) {
+                    resetSound(winSound);
+                    showEndScreen('🎉 You Win!');
+                }
+            }
+        }
+
+        function kick() {
+            const distance = Math.abs(playerX - enemyX);
+            const originalX = playerX;
+            playerX += 20;
+            player.style.left = playerX + 'px';
+            player.style.backgroundImage = "url('player_kick.png')";
+            player.style.width = "220px";
+            player.style.height = "880px";
+            resetSound(punchSound);
+
+            setTimeout(() => {
+                playerX = originalX;
+                player.style.left = playerX + 'px';
+                player.style.backgroundImage = "url('player.png')";
+                player.style.width = "250px";
+                player.style.height = "1000px";
+            }, 250);
+
+            if (distance < 230) {
+                enemyHealth = Math.max(0, enemyHealth - 15);
+                shake(enemy);
+                showPOW(enemyX - 40, 120);
                 updateHealth();
                 if (enemyHealth <= 0) {
                     resetSound(winSound);
@@ -387,11 +400,13 @@
         }
 
         function showPOW(x, y) {
-            const pow = document.createElement('div');
+            const pow = document.createElement('img');
+            pow.src = 'pow.png';
             pow.className = 'pow-effect';
-            pow.innerText = 'POW!';
             pow.style.left = x + 'px';
             pow.style.top = y + 'px';
+            pow.style.width = '100px';
+            pow.style.height = '100px';
             arena.appendChild(pow);
             setTimeout(() => pow.remove(), 300);
         }
@@ -412,17 +427,41 @@
             else bar.classList.add('high');
         }
 
+        function showEndScreen(message) {
+            const overlay = document.createElement('div');
+            overlay.className = 'overlay';
+            const title = document.createElement('h1');
+            const subtitle = document.createElement('p');
+            if (message.includes('Win')) {
+                title.textContent = "🎉 You Win!";
+                subtitle.textContent = "Victory is yours! You've shown true power. Ready for a rematch?";
+            } else {
+                title.textContent = "💀 You Lose!";
+                subtitle.textContent = "Defeated this time... but every fighter rises again. Try again, champion!";
+            }
+            overlay.appendChild(title);
+            overlay.appendChild(subtitle);
+            document.body.appendChild(overlay);
+            setTimeout(() => location.reload(), 4000);
+        }
+
+        // 🧠 SMART ENEMY AI + JUMP
         setInterval(() => {
-            const distance = enemyX - playerX;
-            if (distance > 140) {
-                enemyX -= 10;
-            } else if (!isJumping) {
+            const distance = playerX - enemyX;
+
+            if (Math.random() < 0.2) enemyJump(); // 20% chance to jump
+
+            if (Math.abs(distance) > 140) {
+                enemyX += distance > 0 ? 10 : -10;
+            } else if (!enemyJumping) {
+                const attackType = Math.random() < 0.5 ? 'punch' : 'kick';
                 const originalX = enemyX;
-                enemyX -= 20;
+                enemyX += distance > 0 ? 20 : -20;
+
                 enemy.style.left = enemyX + 'px';
-                enemy.style.backgroundImage = "url('enemy_punch.png')";
-                enemy.style.width = "220px";
-                enemy.style.height = "330px";
+                enemy.style.backgroundImage = attackType === 'kick' ? "url('enemy_kick.png')" : "url('enemy_punch.png')";
+                enemy.style.width = attackType === 'kick' ? "200px" : "220px";
+                enemy.style.height = attackType === 'kick' ? "280px" : "330px";
 
                 resetSound(enemyPunchSound);
 
@@ -432,19 +471,22 @@
                     enemy.style.backgroundImage = "url('enemy.png')";
                     enemy.style.width = "180px";
                     enemy.style.height = "300px";
-                }, 200);
+                }, 250);
 
-                playerHealth = Math.max(0, playerHealth - 10);
+                const damage = attackType === 'kick' ? 15 : 10;
+                playerHealth = Math.max(0, playerHealth - damage);
                 shake(player);
-                showPOW(playerX, 100);
+                showPOW(playerX, 120);
                 updateHealth();
+
                 if (playerHealth <= 0) {
                     resetSound(loseSound);
                     showEndScreen('💀 You Lose!');
                 }
             }
+
             enemy.style.left = enemyX + 'px';
-        }, 600);
+        }, 800);
     </script>
 </body>
 
